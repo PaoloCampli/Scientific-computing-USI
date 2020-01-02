@@ -1,0 +1,481 @@
+\documentclass{beamer}
+\usepackage[ngerman,english]{babel}
+\usepackage{amsmath}
+\usepackage{longtable}
+\usepackage{rotating}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{tikz}
+\usepackage{dcolumn}
+\usepackage{verbatim}
+\usepackage{subfigure}
+\usetikzlibrary{arrows,shapes}
+\usepackage{dcolumn}
+\setbeamertemplate{navigation symbols}{}
+
+
+\usetheme{Boadilla}
+
+\makeatother
+\setbeamertemplate{footline}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.4\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}Rapha\"{e}l Parchet (USI)
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.6\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle\hspace*{3em}
+    \insertframenumber{} / \inserttotalframenumber\hspace*{1ex}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+\makeatletter
+
+
+
+\title{Scientific Computing}
+\subtitle{Code, Data, Replicate}
+%\author[Parchet \& K\"{u}ng, USI]{Rapha\"{e}l Parchet \& Lorenz K\"{u}ng}
+\institute{\begin{normalsize} PhD in Economics \& Finance, \\\vspace{0.2cm} Universit\`{a} della Svizzera italiana \\\vspace{0.2cm}\end{normalsize}}
+
+\date{December 2019}
+\begin{document}
+
+\setlength{\unitlength}{\textwidth}  % measure in textwidths
+
+
+
+\frame{\titlepage}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\subsection{Introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame
+{
+	\frametitle{Introduction}
+	This is an incomplete set of notes on best practices for coding and data management of your project.\linebreak
+	
+	These notes are borrowed mainly from Michael Stepner's  \href{https://github.com/michaelstepner/healthinequality-code}{Coding Style Guide} (see also references therein). All errors, bad advice and incompleteness are mine.\linebreak
+	
+	Challenges you will face (no escape):
+	
+	\begin{itemize}
+		\item  How did I download this data? I need to add/change a variable...
+		\item I need to update Figure X. Where is the code that generates it?
+		\item `Cannot find' error: How can I setup a collaborative work such that my code is not dependent on my own file path?
+		\item I need to add a year / correct an error. How am I sure that all results in my paper are up-to-date (including the ones generated through different software)?   
+	\end{itemize}
+	
+	
+}
+
+\frame
+{
+\frametitle{Introduction}
+
+\begin{itemize}
+	\item Technical debt
+	\begin{itemize}
+		\item Coding guidelines are an investment to save your future time. 
+		\item It might be tempting (and sometime it makes sense) to go fast (hard-core coding) but you'll have to pay the price of low-quality rushed coding in the future.
+	\end{itemize}
+\vspace{0.2cm}
+\item Replication
+\begin{itemize}
+	\item Top journals require  a replication file for your results.
+	\item AEA's \href{https://www.aeaweb.org/journals/policies/data-code/}{Data and Code Availability Policy}: the replication materials shall include (a) the data set(s), (b) \textbf{the programs used to create any final and analysis data sets from raw data}, (c) programs used to run the final models, and (d) description sufficient to allow all programs to be run.
+	\begin{itemize}
+		\item It might be required by the editors and reviewers prior to acceptance
+		\item The AEA Data Editor verify all information prior to acceptance
+		\item This is a new data policy that started in July 2019
+	\end{itemize}
+
+\end{itemize}
+\end{itemize}
+
+
+}
+
+
+\frame
+{
+	\frametitle{Folder Organization}
+
+A good system makes it easy to know where to put things and where to find things: \newline
+	\begin{itemize}
+		\item[] /code
+		\item[] /data
+		\begin{itemize}
+			\item[] /data/raw
+			\item[] /data/derived
+		\end{itemize}
+		\item[] /scratch
+		\item[] /results
+	\end{itemize}
+	
+	
+}
+
+\frame
+{
+	\frametitle{Folder Organization}
+	
+	\begin{itemize}
+		\item[] /code
+		\begin{itemize}
+			\item All do-files go to /code
+			\item The only exception is a master do-file that will set the environment of your project and run all do-files (more in this later)
+			\item Should be organized in sub-folders reflecting the structure of your project
+			\item Best practice:
+			\begin{itemize}
+				\item /code/ado for your programs 
+				\item /code/ado\_scc for other user-written programs
+			\end{itemize}
+		\end{itemize}
+	\end{itemize}
+	
+	
+}
+
+\frame
+{
+	\frametitle{Folder Organization}
+	
+	\begin{itemize}
+		\item[] /data/raw
+		\begin{itemize}
+			\item Original data (.txt, .csv, .dta, ...) without which the code cannot run
+			\item Should be organized in sub-folders reflecting the structure of your data
+			\item Best practice:
+			\begin{itemize}
+				\item Each sub-folder should have a \textsl{source.txt} file with information on how the data was obtained and the date.
+				\item For public data: describe how a stranger can access the data; for private data, describe how the data was created
+			\end{itemize}
+		\end{itemize}
+	\item[] /data/derived
+	\begin{itemize}
+		\item All data created by your code. Will be re-generated during the replication
+		\item Could of course be used by a do-file to create another dataset
+	\end{itemize}
+	\end{itemize}
+	
+	
+}
+
+\frame
+{
+	\frametitle{Folder Organization}
+	
+	\begin{itemize}
+		\item[] / scratch
+		\begin{itemize}
+			\item All results, figures (even datasets) that are the output of your research
+			\item Should be organized in sub-folders reflecting the structure of your paper
+			\item Best practice:
+			\begin{itemize}
+				\item All filenames (and folders) should be descriptive. Do not use \textsl{Figure 1.png} but \textsl{Tax rates by canton 1950-2016.png}. 
+				\item This way you will find easily what your are looking for. Idea: could be sent to someone by email and will be self-explanatory
+			\end{itemize}
+		\end{itemize}	
+	\item[] / results
+	\begin{itemize}
+		\item Only results that appear in the paper
+		\item Best practice:
+		\begin{itemize}
+			\item \textbf{One}  (and only one!) do-file (in /code) copies your outputs from  /scratch to /results and relabel them according to the position in the paper (e.g. \textsl{Figure1.png})
+			\item All figures should have their associated .csv file with the numbers underlying the figure 
+			\item Every statistics/number reported in the paper should appear in a .csv file associated with it 
+		\end{itemize}
+	\end{itemize}	
+	\end{itemize}	
+	
+}
+
+\frame
+{
+	\frametitle{Coding Style}
+	
+	\begin{itemize}
+		\item Every do-file has one task that can be explained in one sentence
+		\begin{itemize}
+			\item \textbf{Short}: you can scroll through a do-file and easily understand what it does
+			\item \textbf{Self-contained}: each do-file interacts with the code through the files it loads (/data/raw and /data/derived) and the file it saves (/data/derived)
+			\begin{itemize}
+				\item Your do-file will affect other do-files only through the data
+			\end{itemize}
+			\item \textbf{Focus}: one task per do-file
+				\begin{itemize}
+				\item Easily find where to change the code
+			\end{itemize}
+		\end{itemize}
+	\item Each do-file should be able to obtain the \textbf{root folder} of the project
+	\begin{itemize}
+		\item The root folder is defined once in the master do-file
+		\item Throughout the code, refer to all files using relative paths to the root folder 
+	\end{itemize}
+	\end{itemize}	
+	
+}
+
+\frame
+{
+	\frametitle{Coding Style}
+	
+	\begin{itemize}
+		\item Variable names, functions, files should consist of complete words
+		\begin{itemize}
+			\item Use abbreviations only if everybody will understand it (e.g. use ``income\_percapita'' instead of ``inc\_pc'')
+			\item This applies also to do-file names, figures and datasets! Use descriptive names
+			\item Do not be afraid of using long names and spaces!  
+		\end{itemize}
+	\item Datasets have unique IDs (``key'' or ``level''): e.g. person, person-by-year or municipality-by-year-by-incomequartile,...
+	\begin{itemize}
+		\item Knowing the level of the dataset is necessary to merge different datasets
+		\item Any key is unique
+		\begin{itemize}
+			\item No duplicates
+			\item No missing values
+			\item Check this by using the Stata command \textbf{isid}: e.g. isid mun year hh\_inc\_quart
+		\end{itemize}
+	\item The level of the dataset should appear in the name of the dataset: e.g. ``number of taxpayers by mun\_year\_incquartile.dta''
+	\end{itemize}
+	\end{itemize}	
+	
+}
+\frame
+{
+	\frametitle{Coding Style}
+	
+	\begin{itemize}
+		\item Assert what you expect to be true 
+		\begin{itemize}
+			\item E.g. \textbf{assert} inc $>$ 0 or \textbf{isid} mun year incquartile 
+			\item The code will return an error is the statement is false
+			\item Write a test each time you encounter and fix an error 
+		\end{itemize}
+	
+	\item Avoid repeating yourself
+	\begin{itemize}
+		\item Use a \textbf{loop} if you change only one thing in the code
+		\item Use a \textbf{program} is you change multiple things within the code or if you need to run the code multiple times in the do-file
+		\begin{itemize}
+			\item Define the program at the beginning of the do-file
+			\item Write cap program drop $<$program name$>$ before  program define $<$program name$>$
+		\end{itemize}
+		\item Write an \textbf{ado-file} if you need to repeat the code across multiple do-files
+		\begin{itemize}
+			\item This is a program that is used in different do-files
+			\item The file name of the ado-file should be the same as the name of the program
+			\item Store ado files in /code/ado and adds that folder the Stata's adopath	(adopath ++ "\$root/code/ado")
+		\end{itemize}
+	\end{itemize}
+	\end{itemize}	
+	
+}
+\frame
+{
+	\frametitle{Automation}
+	
+	\begin{itemize}
+		\item Challenge: you will have many do-files.
+		\begin{itemize}
+			\item What order the do-files need to be run?
+			\item How the do-files depend on each other?
+			\item Which do-files need to be run after something is changed in order to bring the results up to date?
+		\end{itemize}
+		\item Solution: the process need to be automated.
+		\begin{itemize}
+			\item Automation starts with a \textbf{master do-file}. 
+			\begin{itemize}
+				\item Defines the environment (e.g. root folder)
+				\item Manages the web of inter-connected do-files
+			\end{itemize}
+			\item The Stata command \textbf{project}, written by Robert Picard is an excellent automation build tool:
+			\begin{itemize}
+				\item It keeps track of the dependencies
+				\item It skips do-file with unchanged dependencies
+				\item It creates archives and prepares the replication of your project
+			\end{itemize}
+		\end{itemize}
+	\end{itemize}	
+	
+}
+
+
+\frame
+{
+	\frametitle{Defining the root folder}
+	
+	\begin{itemize}
+		\item The path will be different on your computer from someone else's computer, so it shouldn't be hard-coded anywhere in the code.
+\vspace{0.2cm}
+		\item Add it instead to Stata's configuration 
+		\begin{enumerate}
+			\item Open Stata and run \textbf{doedit "`c(sysdir\_personal)'/profile.do"}. This will open a do-file editor to the profile.do file in your PERSONAL folder.
+			\item Write \textbf{taxrate\_root "$<$path to your root folder$>$"} and save the do-file.
+			\item Close and reopen Stata
+		\end{enumerate}
+\vspace{0.2cm}
+	\item Define the root folder in a the master do-file
+	\begin{itemize}
+		\item  \textbf{global root "\$\{taxrate\_root\}"}
+	\end{itemize}
+	\end{itemize}	
+	
+}
+
+\frame
+{
+	\frametitle{Automated build tools}
+	
+	\begin{itemize}
+		\item An automated build tool understands the structure of the entire collection of do-files and how all pieces fit together
+		\vspace{0.2cm}
+		\item The automated build tool will
+		\begin{itemize}
+			\item Build the project from top-to-bottom
+			\item Check which files have changed and re-run only the do-file that depends on the files that have changed (no comment/un-comment anymore!)
+			\item Tell you how each file connects together. For any file, it can tell you which do-file (if any) created it and which do-files use it.
+			\item Create an archive by copying files that have changed since the last archive (but not the files created by the project). This provides a quick and simple way to back up
+			what's new/changed in the project
+			\item Prepare the replication by removing all files created by the project
+		\end{itemize}
+		\item There are many automated build tools (e.g. \textbf{make}). Stata users can use  \textbf{project} written by Robert Picard.
+		\end{itemize}	
+	
+}
+
+
+\frame
+{
+	\frametitle{Stata command -project-}
+	
+	\begin{itemize}
+		\item Install: ssc install project
+	\vspace{0.2cm}
+		\item Define a new project: \textbf{project, setup}
+		\begin{itemize}
+			\item This brings up a dialog window that you use to select the project's master do-file.
+			\item The root folder can then always be accessed with \textbf{project, doinfo} and then typing, e.g., \textbf{global root `r(pdir)'}
+		\end{itemize}	\vspace{0.2cm}
+		\item Build a project: \textbf{project  projectname, build}
+		\begin{itemize}
+			\item Checks which files have changed since the last build. It then runs any do-files whose code has changed or which depend on any files that have changed
+			\item No need to re-run time-consuming code that haven't change. No need to comment out part of your code (and then forget to undo)
+		\end{itemize}
+		\vspace{0.2cm}
+	\item 	In order to do this -project- requires each do-file to specify which files it loads and which files it creates using build commands.
+	\end{itemize}	
+	
+}
+
+
+
+\frame
+{
+	\frametitle{Stata command -project-}
+	
+		\begin{itemize}
+			\item \textbf{project, original(filepath)} says that you are using a file that wasn't generated in this -project- build. 
+			\begin{itemize}
+				\item Links to your data in /data/raw
+				\item Usually before \textbf{use} or \textbf{import} 
+				\item Clears data in memory. Sometimes convenient to define on top of the do-file for a dataset you will later use (through, e.g., a merge). 
+			\end{itemize}
+		\item \textbf{project, relies\_on(filepath)} for referencing a file that wasn't generated in this -project- build but that will not affect your code 
+		\begin{itemize}
+			\item Usually a .txt of .pdf file that is an important reference. Is you change this file, the do-file pointing to it will be re-run
+		\end{itemize}
+	\item \textbf{project, uses(filepath)} for files that were generated by the project
+	\begin{itemize}
+		\item Typically a file in  /data/derived
+		\item These files will be deleted before a replication
+	\end{itemize}
+	\item \textbf{project, creates(filepath)} for files that were created by the project
+\begin{itemize}
+	\item After a \textbf{save} command
+	\item Will clear data in memory. If you do not want that, add \textbf (e.g. project, creates("mydata.dta") preserve)
+	
+\end{itemize}
+\item \textbf{project, do(filename)}  to run a nested do-file.
+		\end{itemize}	
+	
+}
+
+
+\frame
+{
+	\frametitle{Stata command -project-}
+	
+	\begin{itemize}
+		\item \textbf{project projectname, list(build)} lists the current build. Nested do-files are indented and all dependencies are shown, in order of appearance.
+		\vspace{0.2cm}
+		\item \textbf{project projectname, list(concordance)} lists every file used or created by the project, and under each file states which do-files used or created it
+		\vspace{0.2cm}
+		\item \textbf{project projectname, replicate} builds the project, move all the files created by the project to a folder called replicate, then build the project again
+		\vspace{0.2cm}
+		\item \textbf{project projectname, share(sharename, alltime nocreated)} creates a folder under archive containing all the files required to build the project from scratch
+	\end{itemize}	
+	
+	
+}
+\frame
+{
+	\frametitle{How to start a do-file}
+return clear \linebreak
+capture project, doinfo \linebreak
+if (\_rc==0 \& !mi(r(pname)))\{ \linebreak
+\phantom{----} global root `r(pdir)' // using -project- \linebreak
+\phantom{----} local doname "`r(dofile)'" // to be used to name file after dofile name \linebreak
+\} \linebreak
+else \{ // running directly \linebreak
+\phantom{----}	if ("\${taxrate\_root}"=="") do `"`c(sysdir\_personal)'/profile.do"' \linebreak
+\phantom{----}	do "\${taxrate\_root}/code/set\_environment.do" \linebreak
+\phantom{----} local doname = "$<$name of your file here$>$" \linebreak
+	\}
+
+
+}
+
+\frame
+{
+	\frametitle{set\_environment.do}
+clear all \linebreak
+set more off \linebreak
+pause on \linebreak
+
+global root "\${taxrate\_root}" \linebreak
+
+adopath ++ "\$root/code/ado\_ssc" \linebreak
+adopath ++ "\$root/code/ado" \linebreak
+
+* Disable project (since running do-files directly) \linebreak
+cap program drop project \linebreak
+program define project \linebreak
+di "Project is disabled, skipping project command. (To re-enable, run -{stata program drop project}-)" \linebreak
+end
+
+	
+}
+
+
+\frame
+{
+	\frametitle{More resources}
+	
+	\begin{itemize}
+		\item Gentzkow \& Shapiro (2014)  \href{http://web.stanford.edu/~gentzkow/research/CodeAndData.pdf}{``Code and Data for the Social Sciences; A Practitioner's Guide''}
+		\item Principled Data Processing by Patrick Ball (youtube): \href{https://www.youtube.com/watch?v=ZSunU9GQdcI}{https://www.youtube.com/watch?v=ZSunU9GQdcI}
+		\item Martin von Gaudecker's \href{https://econ-project-templates.readthedocs.io/en/stable/}{``Tutorial: Templates for reproducible research projects''} 
+		\item Jonathan Dingel's \href{https://github.com/jdingel/projecttemplate}{``Project template''}
+	\end{itemize}	
+	
+}
+
+
+\end{document}
+
+
